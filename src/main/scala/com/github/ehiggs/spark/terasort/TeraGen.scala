@@ -23,32 +23,32 @@ import org.apache.spark.{SparkConf, SparkContext}
 object TeraGen {
   def main(args: Array[String]) {
 
-    if (args.length < 2) {
+    if (args.length < 3) {
       println("Usage:")
       println("DRIVER_MEMORY=[mem] spark-submit " +
         "com.github.ehiggs.spark.terasort.TeraGen " +
         "spark-terasort-1.0-SNAPSHOT-with-dependencies.jar " +
-        "[output-size] [output-directory]")
+        "[output-size] [output-directory] [partition-number]")
       println(" ")
       println("Example:")
       println("DRIVER_MEMORY=50g spark-submit " +
         "com.github.ehiggs.spark.terasort.TeraGen " +
         "spark-terasort-1.0-SNAPSHOT-with-dependencies.jar " +
-        "100G file:///scratch/username/terasort_in")
+        "100G file:///scratch/username/terasort_in 100")
       System.exit(0)
     }
 
     // Process command line arguments
     val outputSizeInBytes = sizeStrToBytes(args(0))
     val outputFile = args(1)
-
+    val parts = args(2).toInt
     val size = sizeToSizeStr(outputSizeInBytes)
 
     val conf = new SparkConf()
       .setAppName(s"TeraGen ($size)")
     val sc = new SparkContext(conf)
 
-    val parts = sc.defaultParallelism
+    // val parts = sc.defaultParallelism
     val recordsPerPartition = outputSizeInBytes / 100 / parts.toLong
     val numRecords = recordsPerPartition * parts.toLong
 
